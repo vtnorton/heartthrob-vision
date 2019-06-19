@@ -8,6 +8,7 @@ $(document).ready(function () {
 })
 
 function processImage (img) {
+  // TODO: src pode ou não contem o caminho completo do site
   var sourceImageUrl = $(img).attr("src")
   
   var subscriptionKey = '94e8fd9a573d4027bdf4e525be6b1a28'

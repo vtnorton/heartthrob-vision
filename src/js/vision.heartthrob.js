@@ -8,8 +8,7 @@ $(document).ready(function () {
 })
 
 function processImage (img) {
-  // var sourceImageUrl = $(img).attr("src");
-  sourceImageUrl = 'https://osegredo.com.br/wp-content/uploads/2018/02/as-pessoas-de-cora%C3%A7%C3%B5es-de-ouro-830x450.jpg'
+  var sourceImageUrl = $(img).attr("src")
   
   var subscriptionKey = '94e8fd9a573d4027bdf4e525be6b1a28'
   

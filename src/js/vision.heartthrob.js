@@ -11,6 +11,7 @@ function processImage (img) {
   // TODO: src pode ou não contem o caminho completo do site
   var sourceImageUrl = $(img).attr("src")
   
+  // TODO: subscriptionKey no Init do projeto + ocultar a da demo
   var subscriptionKey = '94e8fd9a573d4027bdf4e525be6b1a28'
   
   // Free trial subscription keys are generated in the "westus" region.

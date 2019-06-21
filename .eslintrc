@@ -12,6 +12,7 @@
         "ecmaVersion": 2018
     },
     "rules": {
-        "indent": [true, "tabs", 4]
+        "indent": ["error", "tab"],
+        "no-tabs": 0
     }
 }

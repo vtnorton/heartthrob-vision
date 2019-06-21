@@ -8,21 +8,22 @@
      * localProjectWarning	(Boolean)   Captions is available only if your images could be found online, if that is the case, than you can put a false value here.
  */
 // eslint-disable-next-line no-unused-vars
-function hVision (conf = null) {
-	var conf = conf || {};
+function hVision (conf) {
+	// eslint-disable-next-line no-redeclare
+	var conf = conf || {}
 	var defaults = {
-		subscriptionKey: "",
-		uriBase: "",
-		language: "en",
+		subscriptionKey: '',
+		uriBase: '',
+		language: 'en',
 		imageWithEmptyAlt: false,
 		localProjectWarning: true
 	}
 
- 	for (var key in defaults){
-		if (typeof conf[key] !== 'boolean'){
+	for (var key in defaults) {
+		if (typeof conf[key] !== 'boolean') {
 			conf[key] = conf[key] || defaults[key]
 		}
-    }
+	}
 
 	if (conf.localProjectWarning && !window.location.hostname.startsWith('http')) {
 		console.warn('heartthrob-vision: your project/images must be online to have caption in your images. More info at: https://heartthrob.vtnorton.com/vision')
@@ -33,7 +34,7 @@ function hVision (conf = null) {
 				hProcessImage(element, conf)
 			} else {
 				var caption = element.getAttribute('alt').trim()
-				if (!caption && imageWithEmptyAlt) {
+				if (!caption && conf.imageWithEmptyAlt) {
 					hProcessImage(element, conf)
 				}
 			}
@@ -42,7 +43,7 @@ function hVision (conf = null) {
 }
 
 function hProcessImage (img, conf) {
-	var sourceImageUrl = hGetImageSource(img);
+	var sourceImageUrl = hGetImageSource(img)
 
 	var data = '{"url": ' + '"' + sourceImageUrl + '"}'
 	var headers = new Headers()
@@ -66,35 +67,34 @@ function hProcessImage (img, conf) {
 	})
 }
 
-function hGetImageSource(img){
+function hGetImageSource (img) {
 	var sourceImageUrl = img.getAttribute('src')
 
-	if (!sourceImageUrl.startsWith('http')){
+	if (!sourceImageUrl.startsWith('http')) {
 		var domain = location.host
 		var domainIndex = window.location.href.indexOf(domain)
 		var longAppName = window.location.href.slice(domainIndex + domain.length)
 		var directoryAppName = longAppName.substring(0, longAppName.lastIndexOf('/'))
 
-		if (sourceImageUrl.startsWith('./')){
+		if (sourceImageUrl.startsWith('./')) {
 			sourceImageUrl = sourceImageUrl.replace('./', '')
 		}
 
-		if (sourceImageUrl.startsWith('..')){
+		if (sourceImageUrl.startsWith('..')) {
 			var count = sourceImageUrl.split('../').length - 1
 
-			for(i = 0; i < count; i++){
+			for (var i = 0; i < count; i++) {
 				sourceImageUrl = sourceImageUrl.replace('../', '')
 				directoryAppName = directoryAppName.substring(0, directoryAppName.lastIndexOf('/'))
 			}
 		}
 
-		if (sourceImageUrl.startsWith('/')){
+		if (sourceImageUrl.startsWith('/')) {
 			sourceImageUrl = directoryAppName + sourceImageUrl
-
 		} else {
 			sourceImageUrl = directoryAppName + '/' + sourceImageUrl
 		}
 	}
 
-	return sourceImageUrl;
+	return sourceImageUrl
 }

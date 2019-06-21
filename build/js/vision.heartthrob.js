@@ -1,49 +1,100 @@
-/* eslint-disable no-undef */
-$(document).ready(function(){
-    $.each($("img"), function() {
-        //TOOD: se já contem alt não fazer nada
-        //TODO: se a imagem for menor que 5px não fazer nada
-        processImage(this);
-    });
-});
+/**
+ * Generate caption for all images on your page.
+ * @param   conf    Configuration object. Expects:
+     * subscriptionKey		(string)	Your Azure Cognitive Service Subscription key.
+     * uriBase 				(String)    Uri base of you Azure Cognitive Service.
+     * language     		(String)    Language of your website.
+     * imageWithEmptyAlt	(Boolean)   Set this as true if you want to generate caption for images that you have already put a alt that is empty.
+     * localProjectWarning	(Boolean)   Captions is available only if your images could be found online, if that is the case, than you can put a false value here.
+ */
+// eslint-disable-next-line no-unused-vars
+function hVision (conf) {
+	// eslint-disable-next-line no-redeclare
+	var conf = conf || {}
+	var defaults = {
+		subscriptionKey: '',
+		uriBase: '',
+		language: 'en',
+		imageWithEmptyAlt: false,
+		localProjectWarning: true
+	}
 
-function processImage(img) {
-   // var sourceImageUrl = $(img).attr("src");
-    sourceImageUrl = "https://osegredo.com.br/wp-content/uploads/2018/02/as-pessoas-de-cora%C3%A7%C3%B5es-de-ouro-830x450.jpg";
+	for (var key in defaults) {
+		if (typeof conf[key] !== 'boolean') {
+			conf[key] = conf[key] || defaults[key]
+		}
+	}
 
-    var subscriptionKey = "94e8fd9a573d4027bdf4e525be6b1a28";
+	if (conf.localProjectWarning && !window.location.hostname.startsWith('http')) {
+		console.warn('heartthrob-vision: your project/images must be online to have caption in your images. More info at: https://heartthrob.vtnorton.com/vision')
+	} else {
+		var images = document.querySelectorAll('img')
+		images.forEach(function (element) {
+			if (!element.hasAttribute('alt')) {
+				hProcessImage(element, conf)
+			} else {
+				var caption = element.getAttribute('alt').trim()
+				if (!caption && conf.imageWithEmptyAlt) {
+					hProcessImage(element, conf)
+				}
+			}
+		})
+	}
+}
 
-    // Free trial subscription keys are generated in the "westus" region.
-    // If you use a free trial subscription key, you shouldn't need to change
-    // this region.
-    var uriBase = "https://eastus.api.cognitive.microsoft.com/vision/v2.0/analyze";
-    var params = {
-        "visualFeatures": "Description",
-        "details": "",
-        "language": "en",
-    };
+function hProcessImage (img, conf) {
+	var sourceImageUrl = hGetImageSource(img)
 
-    $.ajax({
-        url: uriBase + "?" + $.param(params),
-        beforeSend: function(xhrObj){
-            xhrObj.setRequestHeader("Content-Type","application/json");
-            xhrObj.setRequestHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
-        },
-        type: "POST",
-        data: '{"url": ' + '"' + sourceImageUrl + '"}',
-    })
+	var data = '{"url": ' + '"' + sourceImageUrl + '"}'
+	var headers = new Headers()
 
-    .done(function(data) {
-       $(img).attr("alt", data.description.captions[0].text);
-       console.log(JSON.stringify(data, null, 2));
-    })
+	headers.append('Content-Type', 'application/json')
+	headers.append('Ocp-Apim-Subscription-Key', conf.subscriptionKey)
 
-    .fail(function(jqXHR, textStatus, errorThrown) {
-        // Display error message.
-        var errorString = (errorThrown === "") ? "Error. " :
-            errorThrown + " (" + jqXHR.status + "): ";
-        errorString += (jqXHR.responseText === "") ? "" :
-            jQuery.parseJSON(jqXHR.responseText).message;
-        alert(errorString);
-    });
-};
+	fetch(conf.uriBase + '?visualFeatures=Description&details=&language=' + conf.language, {
+		method: 'POST',
+		headers: headers,
+		body: data
+	}).then(function (response) {
+		if (!response.ok) {
+			throw Error(response.statusText)
+		}
+		img.setAttribute('alt', response.description.captions[0].text)
+		console.log(JSON.stringify(response, null, 2))
+	}).catch(function (error) {
+		// TODO: get the error code from the response
+		console.log('There was an error with your request. Check if you are not using a local image. Error: ' + error)
+	})
+}
+
+function hGetImageSource (img) {
+	var sourceImageUrl = img.getAttribute('src')
+
+	if (!sourceImageUrl.startsWith('http')) {
+		var domain = location.host
+		var domainIndex = window.location.href.indexOf(domain)
+		var longAppName = window.location.href.slice(domainIndex + domain.length)
+		var directoryAppName = longAppName.substring(0, longAppName.lastIndexOf('/'))
+
+		if (sourceImageUrl.startsWith('./')) {
+			sourceImageUrl = sourceImageUrl.replace('./', '')
+		}
+
+		if (sourceImageUrl.startsWith('..')) {
+			var count = sourceImageUrl.split('../').length - 1
+
+			for (var i = 0; i < count; i++) {
+				sourceImageUrl = sourceImageUrl.replace('../', '')
+				directoryAppName = directoryAppName.substring(0, directoryAppName.lastIndexOf('/'))
+			}
+		}
+
+		if (sourceImageUrl.startsWith('/')) {
+			sourceImageUrl = directoryAppName + sourceImageUrl
+		} else {
+			sourceImageUrl = directoryAppName + '/' + sourceImageUrl
+		}
+	}
+
+	return sourceImageUrl
+}

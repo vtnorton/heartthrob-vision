@@ -12,13 +12,21 @@
         <div>
             <ul>
                 <li><img src="img/baby-child-family-2456327.jpg"></li>
-                <li><img src="img/animal-animal-photography-avian-2474014.jpg"></li>
-                <!--<li><img src="img/download (3).jpg" alt=""></li>
+                <!--<li><img src="img/animal-animal-photography-avian-2474014.jpg"></li>
+                <li><img src="img/download (3).jpg" alt=""></li>
                 <li><img src="img/download.jpg" alt=""></li>-->
             </ul>
         </div>
         <script>
-            hvision()
+            hVision({
+                subscriptionKey: '',
+                localProjectWarning: true,
+            	// Free trial subscription keys are generated in the "westus" region.
+	            // If you use a free trial subscription key, you shouldn't need to change
+	            // this region.
+                uriBase: 'https://eastus.api.cognitive.microsoft.com/vision/v2.0/analyze',
+
+            })
         </script>
     </body>
 </html>

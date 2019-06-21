@@ -1,37 +1,56 @@
+/**
+ * Generate caption for all images on your page.
+ * @param   conf    Configuration object. Expects:
+     * subscriptionKey		(string)	Your Azure Cognitive Service Subscription key.
+     * uriBase 				(String)    Uri base of you Azure Cognitive Service.
+     * language     		(String)    Language of your website.
+     * imageWithEmptyAlt	(Boolean)   Set this as true if you want to generate caption for images that you have already put a alt that is empty.
+     * localProjectWarning	(Boolean)   Captions is available only if your images could be found online, if that is the case, than you can put a false value here.
+ */
 // eslint-disable-next-line no-unused-vars
-function hvision () {
-	var images = document.querySelectorAll('img')
+function hVision (conf = null) {
+	var conf = conf || {};
+	var defaults = {
+		subscriptionKey: "",
+		uriBase: "",
+		language: "en",
+		imageWithEmptyAlt: false,
+		localProjectWarning: true
+	}
 
-	images.forEach(function (element) {
-		if (!element.hasAttribute('alt')) {
-			hProcessImage(element)
-		} else {
-			var caption = element.getAttribute('alt').trim()
-			if (!caption) {
-				hProcessImage(element)
-			}
+ 	for (var key in defaults){
+		if (typeof conf[key] !== 'boolean'){
+			conf[key] = conf[key] || defaults[key]
 		}
-	})
+    }
+
+	if (conf.localProjectWarning && !window.location.hostname.startsWith('http')) {
+		console.warn('heartthrob-vision: your project/images must be online to have caption in your images. More info at: https://heartthrob.vtnorton.com/vision')
+	} else {
+		var images = document.querySelectorAll('img')
+		images.forEach(function (element) {
+			if (!element.hasAttribute('alt')) {
+				hProcessImage(element, conf)
+			} else {
+				var caption = element.getAttribute('alt').trim()
+				if (!caption && imageWithEmptyAlt) {
+					hProcessImage(element, conf)
+				}
+			}
+		})
+	}
 }
 
-function hProcessImage (img) {
-	// TODO: src pode ou não contem o caminho completo do site
-	var sourceImageUrl = img.getAttribute('src')
+function hProcessImage (img, conf) {
+	var sourceImageUrl = hGetImageSource(img);
 
-	// TODO: subscriptionKey no Init do projeto + ocultar a da demo
-	var subscriptionKey = '94e8fd9a573d4027bdf4e525be6b1a28'
-
-	// Free trial subscription keys are generated in the "westus" region.
-	// If you use a free trial subscription key, you shouldn't need to change
-	// this region.
-	var uriBase = 'https://eastus.api.cognitive.microsoft.com/vision/v2.0/analyze'
 	var data = '{"url": ' + '"' + sourceImageUrl + '"}'
 	var headers = new Headers()
 
 	headers.append('Content-Type', 'application/json')
-	headers.append('Ocp-Apim-Subscription-Key', subscriptionKey)
+	headers.append('Ocp-Apim-Subscription-Key', conf.subscriptionKey)
 
-	fetch(uriBase + '?visualFeatures=Description&details=&language=en', {
+	fetch(conf.uriBase + '?visualFeatures=Description&details=&language=' + conf.language, {
 		method: 'POST',
 		headers: headers,
 		body: data
@@ -45,4 +64,37 @@ function hProcessImage (img) {
 		// TODO: get the error code from the response
 		console.log('There was an error with your request. Check if you are not using a local image. Error: ' + error)
 	})
+}
+
+function hGetImageSource(img){
+	var sourceImageUrl = img.getAttribute('src')
+
+	if (!sourceImageUrl.startsWith('http')){
+		var domain = location.host
+		var domainIndex = window.location.href.indexOf(domain)
+		var longAppName = window.location.href.slice(domainIndex + domain.length)
+		var directoryAppName = longAppName.substring(0, longAppName.lastIndexOf('/'))
+
+		if (sourceImageUrl.startsWith('./')){
+			sourceImageUrl = sourceImageUrl.replace('./', '')
+		}
+
+		if (sourceImageUrl.startsWith('..')){
+			var count = sourceImageUrl.split('../').length - 1
+
+			for(i = 0; i < count; i++){
+				sourceImageUrl = sourceImageUrl.replace('../', '')
+				directoryAppName = directoryAppName.substring(0, directoryAppName.lastIndexOf('/'))
+			}
+		}
+
+		if (sourceImageUrl.startsWith('/')){
+			sourceImageUrl = directoryAppName + sourceImageUrl
+
+		} else {
+			sourceImageUrl = directoryAppName + '/' + sourceImageUrl
+		}
+	}
+
+	return sourceImageUrl;
 }

@@ -4,7 +4,7 @@
   "description": "A computer vision to add alt descriptions on images of your website",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo 'no test'"
   },
   "repository": {
     "type": "git",
@@ -28,6 +28,7 @@
     "whatwg-fetch": "^3.0.0"
   },
   "devDependencies": {
+    "babel-eslint": "^10.0.2",
     "eslint": "^5.16.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.17.3",

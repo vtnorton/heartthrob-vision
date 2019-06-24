@@ -1,13 +1,13 @@
 let gulp = require('gulp')
 var concat = require('gulp-concat')
 var rename = require('gulp-rename')
-var uglify = require('gulp-uglify')
+var minifyjs = require('gulp-js-minify')
 
 gulp.task('minify-js', () => {
 	return gulp.src('src/js/*.js')
 		.pipe(concat('vision.heartthrob.js'))
 		.pipe(rename('vision.heartthrob.min.js'))
-		.pipe(uglify())
+		.pipe(minifyjs())
 		.pipe(gulp.dest('build/js'))
 })
 

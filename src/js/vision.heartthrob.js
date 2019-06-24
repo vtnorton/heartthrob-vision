@@ -25,8 +25,12 @@ function hVision (conf) {
 		}
 	}
 
+	if (!conf.subscriptionKey || !conf.uriBase) {
+		console.erro('heartthrob-vision: please make sure to have a Azure subscription key and a uri base for your service. ')
+	}
+
 	if (conf.localProjectWarning && !window.location.hostname.startsWith('http')) {
-		console.warn('heartthrob-vision: your project/images must be online to have caption in your images. More info at: https://heartthrob.vtnorton.com/vision')
+		console.warn('heartthrob-vision: your project/images must be online to have caption in your images. More info at: https://heartthrob.vtnorton.com/vision.html')
 	} else {
 		var images = document.querySelectorAll('img')
 		images.forEach(function (element) {
